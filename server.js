@@ -1,7 +1,8 @@
-import axios from "axios";
-import express from "express";
-import cors from "cors";
-import { clientId, clientSecret } from "./contains.js";
+const express = require("express");
+const axios = require("axios");
+const cors = require("cors");
+const clientId = "wYILEd3tQnCCk4CE6Jihxg";
+const clientSecret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
 const app = express();
 const port = 3000;
 app.use(express.json());
