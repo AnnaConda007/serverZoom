@@ -192,7 +192,7 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
-app.post("/webhook", (request, response) => {
+app.post("/webhookMeetCreated", (request, response) => {
   const payload = request.body.payload;
   const secretToken = "l30cQh8lTxGS_SPCtJFVNw";
   console.log("payload", payload);
