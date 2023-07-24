@@ -194,7 +194,7 @@ app.delete("/deleteConference", async (req, res) => {
 
 app.post("/webhookCreateConference", (request, response) => {
   const payload = request.body.payload;
-  const secretToken = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
+  const secretToken = "l30cQh8lTxGS_SPCtJFVNw";
   console.log("payload", payload);
   if (request.body.event === "endpoint.url_validation") {
     console.log("----------url_validation");
