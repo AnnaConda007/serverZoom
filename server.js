@@ -191,11 +191,22 @@ app.delete("/deleteConference", async (req, res) => {
     }
   }
 });
-
+const crypto = require("crypto");
 app.post("/webhookCreateConference", (req, res) => {
   const payload = req.body;
   console.log("payload", payload);
-  res.status(200).send({ verification_token: payload.plainToken });
+  const secretToken = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
+  const plainToken = payload.plainToken;
+  const hash = crypto
+    .createHmac("sha256", secretToken)
+    .update(plainToken)
+    .digest("hex");
+  const responseObj = {
+    plainToken: plainToken,
+    encryptedToken: hash,
+  };
+  console.log("responseObj", responseObj);
+  res.status(200).json(responseObj);
 });
 
 app.listen(port, () => {
