@@ -193,10 +193,11 @@ app.delete("/deleteConference", async (req, res) => {
 });
 
 app.post("/webhookCreateConference", (req, res) => {
-  const payload = req.body.payload; // получение payload из тела запроса
+  const payload = req.body.payload;
   console.log("payload", payload);
   const secretToken = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
-  const plainToken = payload.plainToken; // получение plainToken из объекта payload
+  const plainToken = payload.plainToken;
+  console.log("plainToken", plainToken);
   const hash = crypto
     .createHmac("sha256", secretToken)
     .update(plainToken)
