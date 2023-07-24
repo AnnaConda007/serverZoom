@@ -193,22 +193,20 @@ app.delete("/deleteConference", async (req, res) => {
 });
 
 app.post("/webhookCreateConference", (req, res) => {
-  const response = req.body;
-  console.log("response", req);
-  if (response.event != "meeting.created") return;
-  let allMeetings = [];
-  let nextPageToken = "";
+  const payload = req.body;
+  if (payload.event != "meeting.created") {
+    const { access_token, meeting } = payload.payload;
+    const conferenceTopic = meeting.topic;
+
+    console.log("Новая конференция создана:", conferenceTopic);
+  }
 
   res.status(200).end();
 });
 
-app.listen(port, () => {
-  console.error(`Server listening at http://localhost:${port}`);
-});
-
-/*
 try {
- 
+  let allMeetings = [];
+  let nextPageToken = "";
   do {
     const response = await axios.get(
       `https://api.zoom.us/v2/users/me/meetings?page_size=300&next_page_token=${nextPageToken}`,
@@ -237,4 +235,8 @@ try {
 
     res.status(500).send(error);
   }
-}*/
+}
+
+app.listen(port, () => {
+  console.error(`Server listening at http://localhost:${port}`);
+});
