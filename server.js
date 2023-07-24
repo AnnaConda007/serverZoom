@@ -1,13 +1,13 @@
 const express = require("express");
 const axios = require("axios");
+const crypto = require("crypto");
 const cors = require("cors");
 const clientId = "wYILEd3tQnCCk4CE6Jihxg";
 const clientSecret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
 const app = express();
 const port = 3000;
-app.use(express.json());
 app.use(cors());
-
+app.use(express.json());
 app.get("/exchangeCode", async (req, res) => {
   const authorizationCode = req.query.code;
   const redirecturl = req.query.redirecturl;
@@ -191,7 +191,7 @@ app.delete("/deleteConference", async (req, res) => {
     }
   }
 });
-const crypto = require("crypto");
+
 app.post("/webhookCreateConference", (req, res) => {
   const payload = req.body;
   console.log("payload", payload);
@@ -208,7 +208,6 @@ app.post("/webhookCreateConference", (req, res) => {
   console.log("responseObj", responseObj);
   res.status(200).json(responseObj);
 });
-
 app.listen(port, () => {
   console.error(`Server listening at http://localhost:${port}`);
 });
