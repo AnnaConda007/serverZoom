@@ -192,50 +192,34 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
+const crypto = require("crypto");
 app.post("/webhookCreateConference", (req, res) => {
   const payload = req.body;
-  if (payload.event != "meeting.created") {
+  if (payload.event === "endpoint.url_validation") {
+    const plainToken = payload.payload.plainToken;
+
+    const secret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ"
+
+    const hash = crypto
+      .createHmac("sha256", secret)
+      .update(plainToken)
+      .digest("hex");
+    res.status(200).json({
+      plainToken: plainToken,
+      encryptedToken: hash,
+    });
+  } else if (payload.event === "meeting.created") {
     const { access_token, meeting } = payload.payload;
     const conferenceTopic = meeting.topic;
 
     console.log("Новая конференция создана:", conferenceTopic);
+    res.status(200).end();
+  } else {
+    res.status(400).end();
   }
-
-  res.status(200).end();
 });
 
-try {
-  let allMeetings = [];
-  let nextPageToken = "";
-  do {
-    const response = await axios.get(
-      `https://api.zoom.us/v2/users/me/meetings?page_size=300&next_page_token=${nextPageToken}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    const meetings = response.data;
-    allMeetings = [...allMeetings, ...meetings.meetings];
-    nextPageToken = meetings.next_page_token;
-  } while (nextPageToken);
-  res.status(200).send({ meetings: allMeetings });
-} catch (error) {
-  console.error("Error retrieving meetings(webhookCreateConference):", error);
-  if (
-    (error.response && error.response.data.code === 124) ||
-    error.response.data.code === 429
-  ) {
-    console.log("обновление токена");
-    res.status(401).send(error.response.data);
-  } else {
-    console.error("Ошибка при получении listMeetings", error);
-
-    res.status(500).send(error);
-  }
-}
+ 
 
 app.listen(port, () => {
   console.error(`Server listening at http://localhost:${port}`);
