@@ -194,20 +194,19 @@ app.delete("/deleteConference", async (req, res) => {
 
 app.post("/webhookCreateConference", (req, res) => {
   const payload = req.body.payload;
-  console.log("payload", payload);
   const secretToken = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
-  const plainToken = payload.plainToken;
-  console.log("plainToken", plainToken);
-  const hash = crypto
-    .createHmac("sha256", secretToken)
-    .update(plainToken)
-    .digest("hex");
-  const responseObj = {
-    plainToken: plainToken,
-    encryptedToken: hash,
-  };
-  console.log("responseObj", responseObj);
-  res.status(200).json(responseObj);
+  console.log("payload", payload);
+  if (request.body.event === "endpoint.url_validation") {
+    const hashForValidate = crypto
+      .createHmac("sha256", secretToken)
+      .update(request.body.payload.plainToken)
+      .digest("hex");
+    response.status(200);
+    response.json({
+      plainToken: request.body.payload.plainToken,
+      encryptedToken: hashForValidate,
+    });
+  }
 });
 
 app.listen(port, () => {
