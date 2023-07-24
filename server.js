@@ -192,6 +192,49 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
+app.post("/webhookCreateConference", (req, res) => {
+  const response = req.body;
+  console.log("response", req);
+  if (response.event != "meeting.created") return;
+  let allMeetings = [];
+  let nextPageToken = "";
+
+  res.status(200).end();
+});
+
 app.listen(port, () => {
   console.error(`Server listening at http://localhost:${port}`);
 });
+
+/*
+try {
+ 
+  do {
+    const response = await axios.get(
+      `https://api.zoom.us/v2/users/me/meetings?page_size=300&next_page_token=${nextPageToken}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const meetings = response.data;
+    allMeetings = [...allMeetings, ...meetings.meetings];
+    nextPageToken = meetings.next_page_token;
+  } while (nextPageToken);
+  res.status(200).send({ meetings: allMeetings });
+} catch (error) {
+  console.error("Error retrieving meetings(webhookCreateConference):", error);
+  if (
+    (error.response && error.response.data.code === 124) ||
+    error.response.data.code === 429
+  ) {
+    console.log("обновление токена");
+    res.status(401).send(error.response.data);
+  } else {
+    console.error("Ошибка при получении listMeetings", error);
+
+    res.status(500).send(error);
+  }
+}*/
