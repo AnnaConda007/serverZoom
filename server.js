@@ -208,7 +208,10 @@ app.post("/webHook", async (request, response) => {
   } else if (request.body.event === "meeting.deleted") {
     console.log("Response deleted:", request);
   } else if (request.body.event === "meeting.created") {
-    console.log("Response created:", request);
+    console.log(
+      "Response created-------------************************************************************************************************************************:",
+      request
+    );
   }
 });
 
