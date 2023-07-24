@@ -197,11 +197,17 @@ app.post("/webhookCreateConference", (req, res) => {
   const secretToken = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
   console.log("payload", payload);
   if (request.body.event === "endpoint.url_validation") {
+    console.log("----------url_validation");
     const hashForValidate = crypto
       .createHmac("sha256", secretToken)
       .update(request.body.payload.plainToken)
       .digest("hex");
     response.status(200);
+    console.log(
+      " request.body.payload.plainToken",
+      request.body.payload.plainToken
+    );
+    console.log(" encryptedToken", hashForValidate);
     response.json({
       plainToken: request.body.payload.plainToken,
       encryptedToken: hashForValidate,
