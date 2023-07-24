@@ -193,10 +193,10 @@ app.delete("/deleteConference", async (req, res) => {
 });
 
 app.post("/webhookCreateConference", (req, res) => {
-  const payload = req.body;
+  const payload = req.body.payload; // получение payload из тела запроса
   console.log("payload", payload);
   const secretToken = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
-  const plainToken = payload.plainToken;
+  const plainToken = payload.plainToken; // получение plainToken из объекта payload
   const hash = crypto
     .createHmac("sha256", secretToken)
     .update(plainToken)
@@ -208,6 +208,7 @@ app.post("/webhookCreateConference", (req, res) => {
   console.log("responseObj", responseObj);
   res.status(200).json(responseObj);
 });
+
 app.listen(port, () => {
   console.error(`Server listening at http://localhost:${port}`);
 });
