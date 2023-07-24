@@ -4,7 +4,7 @@ const cors = require("cors");
 const clientId = "wYILEd3tQnCCk4CE6Jihxg";
 const clientSecret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
 const app = express();
-const port = 443;
+const port = 3000;
 app.use(express.json());
 app.use(cors());
 
@@ -192,34 +192,11 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
-const crypto = require("crypto");
 app.post("/webhookCreateConference", (req, res) => {
   const payload = req.body;
-  if (payload.event === "endpoint.url_validation") {
-    const plainToken = payload.payload.plainToken;
-
-    const secret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ"
-
-    const hash = crypto
-      .createHmac("sha256", secret)
-      .update(plainToken)
-      .digest("hex");
-    res.status(200).json({
-      plainToken: plainToken,
-      encryptedToken: hash,
-    });
-  } else if (payload.event === "meeting.created") {
-    const { access_token, meeting } = payload.payload;
-    const conferenceTopic = meeting.topic;
-
-    console.log("Новая конференция создана:", conferenceTopic);
-    res.status(200).end();
-  } else {
-    res.status(400).end();
-  }
+  console.log("payload", payload);
+  res.status(200).end();
 });
-
- 
 
 app.listen(port, () => {
   console.error(`Server listening at http://localhost:${port}`);
