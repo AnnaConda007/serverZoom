@@ -195,7 +195,7 @@ app.delete("/deleteConference", async (req, res) => {
 app.post("/webhookCreateConference", (req, res) => {
   const payload = req.body;
   console.log("payload", payload);
-  res.status(200).end();
+  res.status(200).send({ verification_token: payload.plainToken });
 });
 
 app.listen(port, () => {
