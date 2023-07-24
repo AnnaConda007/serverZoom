@@ -192,20 +192,23 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
-app.post("/webHook",async (request, response) => {
+app.post("/webHook", async (request, response) => {
   const payload = request.body.payload;
   const secretToken = "l30cQh8lTxGS_SPCtJFVNw";
-   if (request.body.event === "endpoint.url_validation") {
+  if (request.body.event === "endpoint.url_validation") {
     const hashForValidate = crypto
       .createHmac("sha256", secretToken)
       .update(request.body.payload.plainToken)
       .digest("hex");
     response.status(200);
-    console.log("Response:", responseObject); 
     response.json({
       plainToken: request.body.payload.plainToken,
       encryptedToken: hashForValidate,
     });
+  } else if (request.body.event === "meeting.deleted") {
+    console.log("Response deleted:", responseObject);
+  } else if (request.body.event === "meeting.created") {
+    console.log("Response created:", responseObject);
   }
 });
 
