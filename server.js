@@ -211,6 +211,7 @@ app.post("/webHook", async (request, response) => {
     request.body.event === "meeting.updated"
   ) {
     console.log("***********:", request.body.event);
+    res.send(request.body);
   }
 });
 
