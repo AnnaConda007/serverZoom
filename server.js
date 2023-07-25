@@ -205,13 +205,12 @@ app.post("/webHook", async (request, response) => {
       plainToken: request.body.payload.plainToken,
       encryptedToken: hashForValidate,
     });
-  } else if (request.body.event === "meeting.deleted") {
-    console.log("Response deleted:", request);
-  } else if (request.body.event === "meeting.created") {
-    console.log(
-      "Response created-------------************************************************************************************************************************:",
-      request
-    );
+  } else if (
+    request.body.event === "meeting.deleted" ||
+    request.body.event === "meeting.created" ||
+    request.body.event === "meeting.updated"
+  ) {
+    console.log("***********:", request.body.event);
   }
 });
 
