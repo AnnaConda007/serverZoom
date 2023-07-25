@@ -192,6 +192,29 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
+const WebSocket = require("ws");
+
+const wss = new WebSocket.Server({ port: 3001 });
+
+wss.on("connection", (ws) => {
+  console.log("WebSocket client connected.");
+
+  // Пример отправки сообщения обратно клиенту при подключении
+  ws.send("Соединение установлено.");
+
+  ws.on("message", (message) => {
+    console.log("Received message from client:", message);
+    // Обработка полученного сообщения от клиента
+
+    // Пример отправки сообщения обратно клиенту
+    ws.send("Получено сообщение от клиента: " + message);
+  });
+
+  ws.on("close", () => {
+    console.log("WebSocket client disconnected.");
+  });
+});
+
 app.post("/webHook", async (request, response) => {
   console.log(request.body.event);
   const secretToken = "l30cQh8lTxGS_SPCtJFVNw";
@@ -213,6 +236,14 @@ app.post("/webHook", async (request, response) => {
     console.log("***********:", request.body.event);
     res.send(request.body);
   }
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(request.body));
+    }
+  });
+
+  // Отправка ответа на запрос вебхука
+  response.send(request.body);
 });
 
 app.listen(port, () => {
