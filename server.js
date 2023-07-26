@@ -1,5 +1,15 @@
+const https = require("https");
+const fs = require("fs");
+
+const privateKey = fs.readFileSync("./key.pem", "utf8");
+const certificate = fs.readFileSync("./cert.pem", "utf8");
+
+const credentials = { key: privateKey, cert: certificate };
 const express = require("express");
-const axios = require("axios");
+
+const axios = require("axios").create({
+  httpsAgent: new (require("https").Agent)({ rejectUnauthorized: false }),
+});
 const crypto = require("crypto");
 const cors = require("cors");
 const WebSocket = require("ws");
@@ -7,10 +17,26 @@ const clientId = "wYILEd3tQnCCk4CE6Jihxg";
 const clientSecret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
 const app = express();
 const port = 3000;
-app.use(cors());
+const httpsServer = https.createServer(credentials, app);
+
+app.use(
+  cors({
+    origin: [
+      "https://8a70-212-58-114-241.ngrok-free.app",
+      "http://localhost:5173",
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.get("/", function (req, res) {
+  res.send("Hello World!");
+});
 app.get("/exchangeCode", async (req, res) => {
+  console.log("**********************");
   const authorizationCode = req.query.code;
+  console.log("authorization_code", authorizationCode);
   const redirecturl = req.query.redirecturl;
 
   try {
@@ -191,7 +217,7 @@ app.delete("/deleteConference", async (req, res) => {
       res.status(500).send(error);
     }
   }
-});  
+});
 
 const server = new WebSocket.Server({ port: 3001 });
 server.on("connection", (ws) => {
@@ -221,6 +247,6 @@ app.post("/webHook", async (request, response) => {
   }
 });
 
-app.listen(port, () => {
-  console.error(`Server listening at http://localhost:${port}`);
+httpsServer.listen(port, () => {
+  console.error(`Server listening at https://localhost:${port}`);
 });
