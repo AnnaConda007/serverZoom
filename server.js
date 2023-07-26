@@ -6,7 +6,7 @@ const WebSocket = require("ws");
 const clientId = "wYILEd3tQnCCk4CE6Jihxg";
 const clientSecret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
 const app = express();
-const port = 443;
+const port = 3000;
 app.use(cors());
 app.use(express.json());
 app.get("/exchangeCode", async (req, res) => {
