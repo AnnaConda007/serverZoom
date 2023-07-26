@@ -191,7 +191,7 @@ app.delete("/deleteConference", async (req, res) => {
       res.status(500).send(error);
     }
   }
-});
+});  
 
 const server = new WebSocket.Server({ port: 3001 });
 server.on("connection", (ws) => {
