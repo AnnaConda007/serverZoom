@@ -2,6 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const crypto = require("crypto");
 const cors = require("cors");
+const WebSocket = require("ws");
 const clientId = "wYILEd3tQnCCk4CE6Jihxg";
 const clientSecret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
 const app = express();
@@ -192,27 +193,10 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
-const WebSocket = require("ws");
-
-const wss = new WebSocket.Server({ port: 3001 });
-
-wss.on("connection", (ws) => {
-  console.log("WebSocket client connected.");
-
-  // Пример отправки сообщения обратно клиенту при подключении
-  ws.send("Соединение установлено.");
-
-  ws.on("message", (message) => {
-    console.log("Received message from client:", message);
-    // Обработка полученного сообщения от клиента
-
-    // Пример отправки сообщения обратно клиенту
-    ws.send("Получено сообщение от клиента: " + message);
-  });
-
-  ws.on("close", () => {
-    console.log("WebSocket client disconnected.");
-  });
+const server = new WebSocket.Server({ port: 444 });
+server.on("connection", (ws) => {
+  console.log("Клиент успешно подключился");
+  ws.send("успех");
 });
 
 app.post("/webHook", async (request, response) => {
@@ -234,16 +218,7 @@ app.post("/webHook", async (request, response) => {
     request.body.event === "meeting.updated"
   ) {
     console.log("***********:", request.body.event);
-    res.send(request.body);
   }
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(request.body));
-    }
-  });
-
-  // Отправка ответа на запрос вебхука
-  response.send(request.body);
 });
 
 app.listen(port, () => {
