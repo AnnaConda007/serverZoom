@@ -1,57 +1,17 @@
-const https = require("https");
-const fs = require("fs");
-
-const privateKey = fs.readFileSync("./key.pem", "utf8");
-const certificate = fs.readFileSync("./cert.pem", "utf8");
-
-const credentials = { key: privateKey, cert: certificate };
 const express = require("express");
-
-const axios = require("axios").create({
-  httpsAgent: new (require("https").Agent)({ rejectUnauthorized: false }),
-});
+const axios = require("axios");
+const crypto = require("crypto");
 const cors = require("cors");
-const WebSocket = require("ws");
 const clientId = "wYILEd3tQnCCk4CE6Jihxg";
 const clientSecret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
 const app = express();
 const port = 3000;
-const httpsServer = https.createServer(credentials, app);
-
-app.use(
-  cors({
-    origin: [
-      "https://8a70-212-58-114-241.ngrok-free.app",
-      "http://localhost:5173",
-    ],
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
-
-app.post("/webHookK", async (request, response) => {
-  const token = "Rsf9_vw8T5uZx7a9DwjQUQ";
-  console.log(request.body.event);
-  const crypto = require("crypto");
-  if (request.body.event === "endpoint.url_validation") {
-    const hashForValidate = crypto
-      .createHmac("sha256", token)
-      .update(request.body.payload.plainToken)
-      .digest("hex");
-
-    response.status(200);
-    response.json({
-      plainToken: request.body.payload.plainToken,
-      encryptedToken: hashForValidate,
-    });
-  }
-});
-
 app.get("/exchangeCode", async (req, res) => {
   const authorizationCode = req.query.code;
-  console.log("authorization_code", authorizationCode);
   const redirecturl = req.query.redirecturl;
+
   try {
     const response = await axios.post("https://zoom.us/oauth/token", null, {
       params: {
@@ -232,12 +192,24 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
-const server = new WebSocket.Server({ port: 3001 });
-server.on("connection", (ws) => {
-  // console.log("Клиент успешно подключился");
-  ws.send("успех");
+app.post("/webhook", (request, response) => {
+  console.log("****");
+  const payload = request.body.payload;
+  const secretToken = "j5g2KkKDRsWibu5xiYje8g";
+  console.log("payload", payload);
+  if (request.body.event === "endpoint.url_validation") {
+    const hashForValidate = crypto
+      .createHmac("sha256", secretToken)
+      .update(request.body.payload.plainToken)
+      .digest("hex");
+    response.status(200);
+    response.json({
+      plainToken: request.body.payload.plainToken,
+      encryptedToken: hashForValidate,
+    });
+  }
 });
 
-httpsServer.listen(port, () => {
-  console.error(`Server listening at https://localhost:${port}`);
+app.listen(port, () => {
+  console.error(`Server listening at http://localhost:${port}`);
 });
