@@ -207,13 +207,13 @@ app.delete("/deleteConference", async (req, res) => {
     }
   }
 });
-
+/*
 const server = new WebSocket.Server({ port: 3001 });
 server.on("connection", (ws) => {
   //console.log("Клиент успешно подключился");
   ws.send("успех");
 });
-
+*/
 app.post("/webHooks", async (request, response) => {
   console.log("77777");
   try {
