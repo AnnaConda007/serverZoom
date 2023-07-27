@@ -210,22 +210,21 @@ app.delete("/deleteConference", async (req, res) => {
 
 const server = new WebSocket.Server({ port: 3001 });
 server.on("connection", (ws) => {
- // console.log("Клиент успешно подключился");
+  // console.log("Клиент успешно подключился");
   ws.send("успех");
 });
 
-app.post("/webHooks", async (request, response) => {
+app.post("/webHook", async (request, response) => {
+  const crypto = require("crypto");
   console.log("77777");
   try {
-    console.log(request.body);
     console.log(request.body.event);
-    const secretToken = "j5g2KkKDRsWibu5xiYje8g";
+    const secretToken = "PeT-gykoSbWI_NeFbvs9Pw";
     if (request.body.event === "endpoint.url_validation") {
       const hashForValidate = crypto
         .createHmac("sha256", secretToken)
         .update(request.body.payload.plainToken)
         .digest("hex");
-
       response.status(200);
       response.json({
         plainToken: request.body.payload.plainToken,
