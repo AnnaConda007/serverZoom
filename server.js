@@ -31,7 +31,7 @@ app.use(
 app.use(express.json());
 
 app.post("/webHookK", async (request, response) => {
-  const token = "VVTIbEdZRuG9H7WmPhh-yA";
+  const token = "Rsf9_vw8T5uZx7a9DwjQUQ";
   console.log(request.body.event);
   const crypto = require("crypto");
   if (request.body.event === "endpoint.url_validation") {
