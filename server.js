@@ -10,7 +10,6 @@ const express = require("express");
 const axios = require("axios").create({
   httpsAgent: new (require("https").Agent)({ rejectUnauthorized: false }),
 });
-const crypto = require("crypto");
 const cors = require("cors");
 const WebSocket = require("ws");
 const clientId = "wYILEd3tQnCCk4CE6Jihxg";
@@ -30,15 +29,29 @@ app.use(
   })
 );
 app.use(express.json());
-app.get("/", function (req, res) {
-  res.send("Hello World!");
+
+app.post("/webHookK", async (request, response) => {
+  const token = "VVTIbEdZRuG9H7WmPhh-yA";
+  console.log(request.body.event);
+  const crypto = require("crypto");
+  if (request.body.event === "endpoint.url_validation") {
+    const hashForValidate = crypto
+      .createHmac("sha256", token)
+      .update(request.body.payload.plainToken)
+      .digest("hex");
+
+    response.status(200);
+    response.json({
+      plainToken: request.body.payload.plainToken,
+      encryptedToken: hashForValidate,
+    });
+  }
 });
+
 app.get("/exchangeCode", async (req, res) => {
-  console.log("**********************");
   const authorizationCode = req.query.code;
   console.log("authorization_code", authorizationCode);
   const redirecturl = req.query.redirecturl;
-
   try {
     const response = await axios.post("https://zoom.us/oauth/token", null, {
       params: {
@@ -221,24 +234,8 @@ app.delete("/deleteConference", async (req, res) => {
 
 const server = new WebSocket.Server({ port: 3001 });
 server.on("connection", (ws) => {
-  console.log("Клиент успешно подключился");
+  // console.log("Клиент успешно подключился");
   ws.send("успех");
-});
-
-app.post("/webHook", async (request, response) => {
-  console.log(request.body.event);
-  const secretToken = "l30cQh8lTxGS_SPCtJFVNw";
-  if (request.body.event === "endpoint.url_validation") {
-    const hashForValidate = crypto
-      .createHmac("sha256", secretToken)
-      .update(request.body.payload.plainToken)
-      .digest("hex");
-    response.status(200);
-    response.json({
-      plainToken: request.body.payload.plainToken,
-      encryptedToken: hashForValidate,
-    });
-  }
 });
 
 httpsServer.listen(port, () => {
