@@ -219,7 +219,7 @@ app.post("/webHook", async (request, response) => {
   console.log("77777");
   try {
     console.log(request.body.event);
-    const secretToken = "PeT-gykoSbWI_NeFbvs9Pw";
+    const secretToken = "ulyhSfKMRKGujIBWkgQR-A";
     if (request.body.event === "endpoint.url_validation") {
       const hashForValidate = crypto
         .createHmac("sha256", secretToken)
