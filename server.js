@@ -221,29 +221,34 @@ app.delete("/deleteConference", async (req, res) => {
 
 const server = new WebSocket.Server({ port: 3001 });
 server.on("connection", (ws) => {
-  console.log("Клиент успешно подключился");
+  //console.log("Клиент успешно подключился");
   ws.send("успех");
 });
 
 app.post("/webHook", async (request, response) => {
-  console.log(request.body.event);
-  const secretToken = "VVTIbEdZRuG9H7WmPhh-yA";
-  if (request.body.event === "endpoint.url_validation") {
-    const hashForValidate = crypto
-      .createHmac("sha256", secretToken)
-      .update(request.body.payload.plainToken)
-      .digest("hex");
-    response.status(200);
-    response.json({
-      plainToken: request.body.payload.plainToken,
-      encryptedToken: hashForValidate,
-    });
-  } else if (
-    request.body.event === "meeting.deleted" ||
-    request.body.event === "meeting.created" ||
-    request.body.event === "meeting.updated"
-  ) {
-    console.log("***********:", request.body.event);
+  try {
+    console.log(request.body); // log whole request body for debugging
+    console.log(request.body.event);
+    const secretToken = "NoI0EulDRiK4lwwC8KGokA";
+    if (request.body.event === "endpoint.url_validation") {
+      const hashForValidate = crypto
+        .createHmac("sha256", secretToken)
+        .update(request.body.payload.plainToken)
+        .digest("hex");
+      response.status(200);
+      response.json({
+        plainToken: request.body.payload.plainToken,
+        encryptedToken: hashForValidate,
+      });
+    } else if (
+      request.body.event === "meeting.deleted" ||
+      request.body.event === "meeting.created" ||
+      request.body.event === "meeting.updated"
+    ) {
+      console.log("***********:", request.body.event);
+    }
+  } catch (err) {
+    console.error(err);
   }
 });
 
