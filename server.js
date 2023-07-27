@@ -214,11 +214,10 @@ server.on("connection", (ws) => {
   ws.send("успех");
 });
 
-app.post("/webHook", async (request, response) => {
+app.post("/webHooks", async (request, response) => {
   const crypto = require("crypto");
-  console.log("77777");
+  console.log(request.body.event);
   try {
-    console.log(request.body.event);
     const secretToken = "ulyhSfKMRKGujIBWkgQR-A";
     if (request.body.event === "endpoint.url_validation") {
       const hashForValidate = crypto
