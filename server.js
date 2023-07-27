@@ -19,20 +19,9 @@ const app = express();
 const port = 3000;
 const httpsServer = https.createServer(credentials, app);
 
-app.use(
-  cors({
-    origin: [
-      "https://8a70-212-58-114-241.ngrok-free.app",
-      "http://localhost:5173",
-    ],
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
-app.get("/", function (req, res) {
-  res.send("Hello World!");
-});
+
 app.get("/exchangeCode", async (req, res) => {
   console.log("**********************");
   const authorizationCode = req.query.code;
@@ -225,27 +214,22 @@ server.on("connection", (ws) => {
   ws.send("успех");
 });
 
-app.post("/webHook", async (request, response) => {
+app.post("/webHooks", async (request, response) => {
   try {
-    console.log(request.body); // log whole request body for debugging
+    console.log(request.body);
     console.log(request.body.event);
-    const secretToken = "NoI0EulDRiK4lwwC8KGokA";
+    const secretToken = "j5g2KkKDRsWibu5xiYje8g";
     if (request.body.event === "endpoint.url_validation") {
       const hashForValidate = crypto
         .createHmac("sha256", secretToken)
         .update(request.body.payload.plainToken)
         .digest("hex");
+
       response.status(200);
       response.json({
         plainToken: request.body.payload.plainToken,
         encryptedToken: hashForValidate,
       });
-    } else if (
-      request.body.event === "meeting.deleted" ||
-      request.body.event === "meeting.created" ||
-      request.body.event === "meeting.updated"
-    ) {
-      console.log("***********:", request.body.event);
     }
   } catch (err) {
     console.error(err);
