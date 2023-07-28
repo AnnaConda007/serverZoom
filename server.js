@@ -1,8 +1,8 @@
 const axios = require("axios");
 const express = require("express");
 const cors = require("cors");
-const clientId = "wYILEd3tQnCCk4CE6Jihxg";
-const clientSecret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
+const clientId = "mkQg8GOmTSem7YxdUujxAA";
+const clientSecret = "YQElNfVwH7Wo7zhvF0WV5HmIZw6jqDr0";
 const app = express();
 const port = 3000;
 app.use(express.json());
