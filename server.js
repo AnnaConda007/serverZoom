@@ -207,11 +207,13 @@ app.delete("/deleteConference", async (req, res) => {
     }
   }
 });
-
+let activeSocket = null;
 const server = new WebSocket.Server({ port: 3001 });
 server.on("connection", (ws) => {
-  // console.log("Клиент успешно подключился");
-  ws.send("успех");
+  activeSocket = ws;
+  ws.on("close", () => {
+    activeSocket = null;
+  });
 });
 
 app.post("/webHooks", async (request, response) => {
@@ -229,6 +231,8 @@ app.post("/webHooks", async (request, response) => {
         plainToken: request.body.payload.plainToken,
         encryptedToken: hashForValidate,
       });
+    } else if (activeSocket) {
+      activeSocket.send(JSON.stringify(request.body));
     }
   } catch (err) {
     console.error(err);
