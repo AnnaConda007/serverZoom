@@ -11,7 +11,7 @@ let activeSocket = null;
 const server = new WebSocket.Server({ port: 3001 });
 app.use(cors());
 app.use(express.json());
-const secretToken = "-_W0O4vPShCbIXoO8WXQJQ";
+const secretToken = "5pHk41n-RMeW2joUwdjw9A";
 
 app.get("/exchangeCode", async (req, res) => {
   const authorizationCode = req.query.code;
@@ -186,8 +186,8 @@ server.on("connection", (ws) => {
   });
 });
 
-app.post("/webHooks", async (request, response) => {
-  console.log(request.body)
+app.post("/webHookTest", async (request, response) => {
+  console.log(request.body);
   try {
     if (request.body.event === "endpoint.url_validation") {
       const hashForValidate = crypto
