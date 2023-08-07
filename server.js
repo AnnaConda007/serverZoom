@@ -1,3 +1,4 @@
+const http = require("http");
 const express = require("express");
 const axios = require("axios").create({
   httpsAgent: new (require("https").Agent)({ rejectUnauthorized: false }),
@@ -5,13 +6,22 @@ const axios = require("axios").create({
 const crypto = require("crypto");
 const cors = require("cors");
 const WebSocket = require("ws");
-const app = express();
 const port = 3000;
+const secretToken = "5pHk41n-RMeW2joUwdjw9A";
+
+const app = express();
+const httpServer = http.createServer(app);
+const wsServer = new WebSocket.Server({ server: httpServer });
 let activeSocket = null;
-const server = new WebSocket.Server({ port: 3001 });
+wsServer.on("connection", (ws) => {
+  activeSocket = ws;
+  ws.on("close", () => {
+    activeSocket = null;
+  });
+});
+
 app.use(cors());
 app.use(express.json());
-const secretToken = "5pHk41n-RMeW2joUwdjw9A";
 
 app.get("/exchangeCode", async (req, res) => {
   const authorizationCode = req.query.code;
@@ -179,7 +189,7 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
-server.on("connection", (ws) => {
+wsServer.on("connection", (ws) => {
   activeSocket = ws;
   ws.on("close", () => {
     activeSocket = null;
@@ -207,6 +217,6 @@ app.post("/webHookTest", async (request, response) => {
   }
 });
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
