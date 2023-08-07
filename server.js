@@ -181,7 +181,7 @@ app.delete("/deleteConference", async (req, res) => {
 
 server.on("connection", (ws) => {
   activeSocket = ws;
-  ws.on("close", () => {
+  wss.on("close", () => {
     activeSocket = null;
   });
 });
