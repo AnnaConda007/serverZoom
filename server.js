@@ -1,33 +1,29 @@
 const https = require("https");
 const fs = require("fs");
-
 const privateKey = fs.readFileSync("./key.pem", "utf8");
 const certificate = fs.readFileSync("./cert.pem", "utf8");
-
 const credentials = { key: privateKey, cert: certificate };
 const express = require("express");
-
 const axios = require("axios").create({
   httpsAgent: new (require("https").Agent)({ rejectUnauthorized: false }),
 });
 const crypto = require("crypto");
 const cors = require("cors");
 const WebSocket = require("ws");
-const clientId = "wYILEd3tQnCCk4CE6Jihxg";
-const clientSecret = "nRPLBGGecg3O2VaUre8c6C7xPvJTboaZ";
 const app = express();
 const port = 3000;
 const httpsServer = https.createServer(credentials, app);
-
+let activeSocket = null;
+const server = new WebSocket.Server({ port: 3001 });
 app.use(cors());
 app.use(express.json());
+const secretToken = "NgNoURBLSSO0U4mpSgxOGQ";
 
 app.get("/exchangeCode", async (req, res) => {
-  console.log("**********************");
   const authorizationCode = req.query.code;
-  console.log("authorization_code", authorizationCode);
   const redirecturl = req.query.redirecturl;
-
+  const clientId = req.query.clientId;
+  const clientSecret = req.query.clientSecret;
   try {
     const response = await axios.post("https://zoom.us/oauth/token", null, {
       params: {
@@ -45,13 +41,15 @@ app.get("/exchangeCode", async (req, res) => {
     const accessToken = response.data.access_token;
     res.send({ refresh_token: refreshToken, access_token: accessToken });
   } catch (error) {
-    console.error("Ошибка при получении токенов", error);
-    res.status(500).send("Error exchanging code for token");
+    console.error("Ошибка при получении токенов", error.response.data || error);
+    res.status(500).send(error.response.data || error);
   }
 });
 
 app.post("/refreshToken", async (req, res) => {
   const refreshToken = req.body.refreshToken;
+  const clientId = req.body.clientId;
+  const clientSecret = req.body.clientSecret;
   try {
     const response = await axios.post("https://zoom.us/oauth/token", null, {
       params: {
@@ -64,7 +62,6 @@ app.post("/refreshToken", async (req, res) => {
         ).toString("base64")}`,
       },
     });
-
     const newAccessToken = response.data.access_token;
     const newRefreshToken = response.data.refresh_token;
     res.send({
@@ -72,8 +69,40 @@ app.post("/refreshToken", async (req, res) => {
       refresh_token: newRefreshToken,
     });
   } catch (error) {
-    console.error("Ошибка при получении refreshToken", error);
-    res.status(500).send("Error refreshing access token");
+    console.error(
+      "Ошибка при получении refreshToken",
+      error.response.data || error
+    );
+    res.status(500).send(error.response.data || error);
+  }
+});
+
+app.get("/listMeetings", async (req, res) => {
+  const accessToken = req.query.accessToken;
+  try {
+    let allMeetings = [];
+    let nextPageToken = "";
+    do {
+      const response = await axios.get(
+        `https://api.zoom.us/v2/users/me/meetings?page_size=300&next_page_token=${nextPageToken}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const meetings = response.data;
+      allMeetings = [...allMeetings, ...meetings.meetings];
+      nextPageToken = meetings.next_page_token;
+    } while (nextPageToken);
+    res.send({ meetings: allMeetings });
+  } catch (error) {
+    console.error(
+      "Ошибка при получении listMeetings:",
+      error.response.data || error
+    );
+    res.status(500).send(error.response.data || error);
   }
 });
 
@@ -104,53 +133,11 @@ app.get("/newConference", async (req, res) => {
     );
     res.send({ meeting: meetingResponse.data });
   } catch (error) {
-    console.error("Error retrieving meetings:", error);
-    if (
-      (error.response && error.response.data.code === 124) ||
-      error.response.data.code === 429
-    ) {
-      console.log("обновление токена");
-      res.status(401).send(error.response.data);
-    } else {
-      console.error("Ошибка при создании новой конференции", error);
-      res.status(500).send(error);
-    }
-  }
-});
-
-app.get("/listMeetings", async (req, res) => {
-  const accessToken = req.query.accessToken;
-  try {
-    let allMeetings = [];
-    let nextPageToken = "";
-    do {
-      const response = await axios.get(
-        `https://api.zoom.us/v2/users/me/meetings?page_size=300&next_page_token=${nextPageToken}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const meetings = response.data;
-      allMeetings = [...allMeetings, ...meetings.meetings];
-      nextPageToken = meetings.next_page_token;
-    } while (nextPageToken);
-    res.send({ meetings: allMeetings });
-  } catch (error) {
-    console.error("Error retrieving meetings:", error);
-    if (
-      (error.response && error.response.data.code === 124) ||
-      error.response.data.code === 429
-    ) {
-      console.log("обновление токена");
-      res.status(401).send(error.response.data);
-    } else {
-      console.error("Ошибка при получении listMeetings", error);
-
-      res.status(500).send(error);
-    }
+    console.error(
+      "Ошибка при создании новой конференции",
+      error.response.data || error
+    );
+    res.status(500).send(error.response.data || error);
   }
 });
 
@@ -168,16 +155,11 @@ app.patch("/updateConferenceInfo", async (req, res) => {
     );
     res.send(response.data);
   } catch (error) {
-    if (
-      (error.response && error.response.data.code === 124) ||
-      error.response.data.code === 429
-    ) {
-      console.log("обновление токена");
-      res.status(401).send(error.response.data);
-    } else {
-      console.error("Ошибка при редактировании конференции", error);
-      res.status(500).send(error);
-    }
+    console.error(
+      "Ошибка при редактировании конференции",
+      error.response.data || error
+    );
+    res.status(500).send(error.response.data || error);
   }
 });
 
@@ -195,30 +177,23 @@ app.delete("/deleteConference", async (req, res) => {
     );
     res.status(200).send(response.data);
   } catch (error) {
-    if (
-      (error.response && error.response.data.code === 124) ||
-      error.response.data.code === 429
-    ) {
-      console.log("обновление токена");
-      res.status(401).send(error.response.data);
-    } else {
-      console.error("Ошибка при удалении конференции", error);
-      res.status(500).send(error);
-    }
+    console.error(
+      "Ошибка при удалении конференции",
+      error.response.data || error
+    );
+    res.status(500).send(error.response.data || error);
   }
 });
 
-const server = new WebSocket.Server({ port: 3001 });
 server.on("connection", (ws) => {
-  // console.log("Клиент успешно подключился");
-  ws.send("успех");
+  activeSocket = ws;
+  ws.on("close", () => {
+    activeSocket = null;
+  });
 });
 
-app.post("/webHooks", async (request, response) => {
-  const crypto = require("crypto");
-  console.log("webHooks", request.body.event);
+app.post("/webHook", async (request, response) => {
   try {
-    const secretToken = "q_FJUFbSRh6wfrbLymogWQ";
     if (request.body.event === "endpoint.url_validation") {
       const hashForValidate = crypto
         .createHmac("sha256", secretToken)
@@ -229,6 +204,8 @@ app.post("/webHooks", async (request, response) => {
         plainToken: request.body.payload.plainToken,
         encryptedToken: hashForValidate,
       });
+    } else if (activeSocket) {
+      activeSocket.send(JSON.stringify(request.body));
     }
   } catch (err) {
     console.error(err);
