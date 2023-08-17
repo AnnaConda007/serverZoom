@@ -42,7 +42,11 @@ app.get("/exchangeCode", async (req, res) => {
     res.send({ refresh_token: refreshToken, access_token: accessToken });
   } catch (error) {
     console.error("Ошибка при получении токенов", error.response.data || error);
-    res.status(500).send(error.response.data || error);
+    if (error.response && error.response.data) {
+      res.status(500).send(error.response.data);
+    } else {
+      res.status(500).send(error);
+    }
   }
 });
 
@@ -73,7 +77,11 @@ app.post("/refreshToken", async (req, res) => {
       "Ошибка при получении refreshToken",
       error.response.data || error
     );
-    res.status(500).send(error.response.data || error);
+    if (error.response && error.response.data) {
+      res.status(500).send(error.response.data);
+    } else {
+      res.status(500).send(error);
+    }
   }
 });
 
@@ -100,9 +108,13 @@ app.get("/listMeetings", async (req, res) => {
   } catch (error) {
     console.error(
       "Ошибка при получении listMeetings:",
-      error.response.data || error
+      error.response || error
     );
-    res.status(500).send(error.response.data || error);
+    if (error.response && error.response.data) {
+      res.status(500).send(error.response.data);
+    } else {
+      res.status(500).send(error);
+    }
   }
 });
 
@@ -137,7 +149,11 @@ app.get("/newConference", async (req, res) => {
       "Ошибка при создании новой конференции",
       error.response.data || error
     );
-    res.status(500).send(error.response.data || error);
+    if (error.response && error.response.data) {
+      res.status(500).send(error.response.data);
+    } else {
+      res.status(500).send(error);
+    }
   }
 });
 
@@ -159,7 +175,11 @@ app.patch("/updateConferenceInfo", async (req, res) => {
       "Ошибка при редактировании конференции",
       error.response.data || error
     );
-    res.status(500).send(error.response.data || error);
+    if (error.response && error.response.data) {
+      res.status(500).send(error.response.data);
+    } else {
+      res.status(500).send(error);
+    }
   }
 });
 
@@ -181,7 +201,11 @@ app.delete("/deleteConference", async (req, res) => {
       "Ошибка при удалении конференции",
       error.response.data || error
     );
-    res.status(500).send(error.response.data || error);
+    if (error.response && error.response.data) {
+      res.status(500).send(error.response.data);
+    } else {
+      res.status(500).send(error);
+    }
   }
 });
 
