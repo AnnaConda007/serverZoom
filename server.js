@@ -197,7 +197,7 @@ wsServer.on("connection", (ws) => {
 });
 
 app.post("/webHookTest", async (request, response) => {
-  console.log(request.body);
+  console.log(request.body.event);
   try {
     if (request.body.event === "endpoint.url_validation") {
       const hashForValidate = crypto
