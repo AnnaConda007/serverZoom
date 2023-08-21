@@ -5,7 +5,7 @@ const axios = require("axios").create({
 });
 const crypto = require("crypto");
 const cors = require("cors");
-const WebSocket = require("wss");
+const WebSocket = require("ws");
 const port = 3000;
 const secretToken = "5pHk41n-RMeW2joUwdjw9A";
 
