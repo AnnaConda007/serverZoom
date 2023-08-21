@@ -5,17 +5,17 @@ const axios = require("axios").create({
 });
 const crypto = require("crypto");
 const cors = require("cors");
-const WebSocket = require("ws");
+const WebSocket = require("wss");
 const port = 3000;
 const secretToken = "5pHk41n-RMeW2joUwdjw9A";
 
 const app = express();
 const httpServer = http.createServer(app);
-const wsServer = new WebSocket.Server({ server: httpServer });
+const wssServer = new WebSocket.Server({ server: httpServer });
 let activeSocket = null;
-wsServer.on("connection", (ws) => {
-  activeSocket = ws;
-  ws.on("close", () => {
+wssServer.on("connection", (wss) => {
+  activeSocket = wss;
+  wss.on("close", () => {
     activeSocket = null;
   });
 });
@@ -189,9 +189,12 @@ app.delete("/deleteConference", async (req, res) => {
   }
 });
 
-wsServer.on("connection", (ws) => {
-  activeSocket = ws;
-  ws.on("close", () => {
+wssServer.onopen = (event) => {
+  console.log("Вебсокет соединение открыто:", event);
+};
+wssServer.on("connection", (wss) => {
+  activeSocket = wss;
+  wss.on("close", () => {
     activeSocket = null;
   });
 });
